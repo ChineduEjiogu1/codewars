@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-​
+
 // Morse code lookup table - dots and dashes for each character
 const char *const morse[55] = {".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--..", "-----", ".----", "..---", "...--", "....-", ".....", "-....", "--...", "---..", "----.", ".-.-.-", "--..--", "..--..", ".----.", "-.-.--", "-..-.", "-.--.", "-.--.-", ".-...", "---...", "-.-.-.", "-...-", ".-.-.", "-....-", "..--.-", ".-..-.", "...-..-", ".--.-.", "...---..."};  
-​
+
 // Corresponding ASCII characters for each morse code
 const char *const ascii[55] = {"A",  "B",    "C",    "D",   "E", "F",    "G",   "H",    "I",  "J",    "K",   "L",    "M",  "N",  "O",   "P",    "Q",    "R",   "S",   "T", "U",   "V",    "W",   "X",    "Y",    "Z",    "0",     "1",     "2",     "3",     "4",     "5",     "6",     "7",     "8",     "9",     ".",      ",",      "?",      "'",      "!",      "/",     "(",     ")",      "&",     ":",      ";",      "=",     "+",     "-",      "_",      "\"",     "$",       "@",      "SOS"};
-​
+
 // Removes leading and trailing spaces while preserving internal spacing
 void trim_leading_trailing_spaces(char *string)
 {
@@ -37,7 +37,7 @@ void trim_leading_trailing_spaces(char *string)
         string[0] = '\0';
     }
 }
-​
+
 char *decode_morse(const char* morse_code) 
 {
      //  <----  hajime!
@@ -61,3 +61,46 @@ char *decode_morse(const char* morse_code)
         // Split at the 3-space boundary
         *three_spaces = '\0';                    // Terminate first word
         char *word1 = morse_string;              // Points to first word
+        char *word2 = three_spaces + 3;          // Points to remaining text after 3 spaces
+      
+        // Process first word: split by single spaces and decode each morse code
+        char *saveptr1;
+        token = strtok_r(word1, " ", &saveptr1);
+        while (token != NULL) 
+        { 
+            // Look up current morse code in the lookup table
+            for (int i = 0; i < num_of_elements; i++)
+            {
+                if (strcmp(token, morse[i]) == 0)
+                {
+                    strcat(morse_concat, ascii[i]);  // Add corresponding character to result
+                }
+            }
+            token = strtok_r(NULL, " ", &saveptr1);  // Get next morse code in this word
+        }
+        
+        // Add space between words in the output
+        strcat(morse_concat, " ");
+      
+        // Update for next iteration: make remaining text the new string to process
+        morse_string = word2;
+        three_spaces = strstr(morse_string, "   ");  // Look for more 3-space sequences
+    } 
+    
+    // Process the final remaining word (no more 3-space sequences found)
+    token = strtok(morse_string, " ");
+    while (token != NULL) 
+    { 
+        // Look up morse code and add corresponding character to result
+        for (int i = 0; i < num_of_elements; i++)
+        {
+            if (strcmp(token, morse[i]) == 0)
+            {
+                strcat(morse_concat, ascii[i]);
+            }
+        }
+        token = strtok(NULL, " ");  // Get next morse code
+    }
+  
+    return morse_concat;  // Return the decoded string
+}
