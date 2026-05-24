@@ -18,3 +18,4 @@ function validate(n) {
   }
   return total % 10 === 0;
 }
+​
